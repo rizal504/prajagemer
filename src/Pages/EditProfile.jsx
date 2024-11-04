@@ -18,7 +18,7 @@ const EditProfilePage = () => {
     dispatch(getDataProfil);
   });
   const dataEditProfile = useSelector((state) => state.profil.dataProfilUser);
-  console.log("data", dataEditProfile);
+  // console.log("data", dataEditProfile);
 
   const [formData, setFormData] = useState({
     nama: dataEditProfile.name,
@@ -56,12 +56,12 @@ const EditProfilePage = () => {
     axios
       .get(`https://api.goapi.io/regional/provinsi?api_key=ce23f533-3df9-51b3-5956-fa58a7a9`)
       .then((response) => {
-        console.log("Fetched Provinces:", response.data.data);
+        // console.log("Fetched Provinces:", response.data.data);
         setProvinsiList(response.data.data);
-        console.log("Hasil Fetching", response.data.data)
+        // console.log("Hasil Fetching", response.data.data)
       })
       .catch((error) => {
-        console.error("Error fetching provinces data:", error);
+        // console.error("Error fetching provinces data:", error);
       });
   }, []);
   
@@ -116,7 +116,7 @@ const EditProfilePage = () => {
         `https://api.goapi.io/regional/kota?provinsi_id=${provinceId}&api_key=ce23f533-3df9-51b3-5956-fa58a7a9`
       )
       .then((response) => {
-        console.log("Fetched Cities:", response.data.data); // Verifikasi respons data
+        // console.log("Fetched Cities:", response.data.data); // Verifikasi respons data
   
         if (type === "domisili") {
           setKotaListDomisili(response.data.data);
@@ -125,7 +125,7 @@ const EditProfilePage = () => {
         }
       })
       .catch((error) => {
-        console.error("Error fetching regencies data:", error);
+        // console.error("Error fetching regencies data:", error);
       });
   };
   
@@ -153,7 +153,7 @@ const EditProfilePage = () => {
             `https://api.goapi.io/regional/kota?provinsi_id=${selectedProvince.id}&api_key=ce23f533-3df9-51b3-5956-fa58a7a9`
           );
   
-          console.log("Fetched KTP Cities:", response.data.data);
+          // console.log("Fetched KTP Cities:", response.data.data);
   
           const kotaList = response.data.data;
           setKotaListKTP(kotaList);
@@ -169,7 +169,7 @@ const EditProfilePage = () => {
             }));
           }
         } catch (error) {
-          console.error("Error fetching KTP cities:", error);
+          // console.error("Error fetching KTP cities:", error);
         }
       }
     }
@@ -269,7 +269,7 @@ const EditProfilePage = () => {
       telp_user: formData.noTelp,
     };
 
-    console.log("Data Handle Submit", data);
+    // console.log("Data Handle Submit", data);
     dispatch(postUpdateProfil(data, navigate));
   };
 
