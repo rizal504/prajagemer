@@ -1,7 +1,8 @@
+// src/App.js
 import "./App.css";
 import React from "react";
-import { Provider } from "react-redux"; // Tambahkan import ini
-import { store } from "./redux/store"; // Pastikan sudah mengimpor store
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,92 +25,37 @@ import DataPengguna from "./Pages_Admin/DataPengguna";
 import EditProfilAdmin from "./Pages_Admin/EditProfilAdmin";
 import SyaratKetentuan from "./Pages/syaratKetentuan";
 import OpsiLogin from "./Pages/OpsiLogin";
+import NotFound from "./Pages/NotFound";
 
 export default function App() {
   const router = createBrowserRouter([
-    {
-      path: "/",
-      element: <Beranda />,
-    },
-    {
-      path: "login",
-      element: <Login />,
-    },
-    {
-      path: "loginopsi",
-      element: <OpsiLogin />,
-    },
-    {
-      path: "register",
-      element: <Register />,
-    },
-    {
-      path: "mitra",
-      element: <InfoMitra />,
-    },
-    {
-      path: "daftarmagang",
-      element: <DaftarMagang />,
-    },
-    {
-      path: "formpendaftaran1",
-      element: <FormPendaftaran1 />,
-    },
-    {
-      path: "formpendaftaran2",
-      element: <FormPendaftaran2 />,
-    },
-    {
-      path: "profileuser",
-      element: <ProfileUser />,
-    },
-    {
-      path: "editprofile",
-      element: <EditProfile />,
-    },
-    {
-      path: "infopendaftaran",
-      element: <InfoPendaftaran />,
-    },
-    {
-      path: "admin",
-      element: <DashboardAdmin />,
-    },
-    {
-      path: "datapelamar",
-      element: <DataPelamar />,
-    },
-    {
-      path: "updateinfo",
-      element: <UpdateInfo />,
-    },
-    {
-      path: "adminakun",
-      element: <AkunAdmin />,
-    },
-    {
-      path: "loginadmin",
-      element: <LoginAdmin />,
-    },
-    {
-      path: "datapengguna",
-      element: <DataPengguna />,
-    },
-    {
-      path: "editprofiladmin",
-      element: <EditProfilAdmin />,
-    },
-    {
-      path: "syaratdanketentuan",
-      element: <SyaratKetentuan />,
-    },
+    { path: "/", element: <Beranda /> },
+    { path: "login", element: <Login /> },
+    { path: "loginopsi", element: <OpsiLogin /> },
+    { path: "register", element: <Register /> },
+    { path: "mitra", element: <InfoMitra /> },
+    { path: "daftarmagang", element: <DaftarMagang /> },
+    { path: "formpendaftaran1", element: <FormPendaftaran1 /> },
+    { path: "formpendaftaran2", element: <FormPendaftaran2 /> },
+    { path: "profileuser", element: <ProfileUser /> },
+    { path: "editprofile", element: <EditProfile /> },
+    { path: "infopendaftaran", element: <InfoPendaftaran /> },
+    { path: "admin", element: <DashboardAdmin /> },
+    { path: "datapelamar", element: <DataPelamar /> },
+    { path: "updateinfo", element: <UpdateInfo /> },
+    { path: "adminakun", element: <AkunAdmin /> },
+    { path: "loginadmin", element: <LoginAdmin /> },
+    { path: "datapengguna", element: <DataPengguna /> },
+    { path: "editprofiladmin", element: <EditProfilAdmin /> },
+    { path: "syaratdanketentuan", element: <SyaratKetentuan /> },
+    // Tambahkan route 404 di sini (opsional)
+    { path: "*", element: <NotFound /> }, // Pastikan NotFound sudah diimpor jika ingin menggunakan ini
   ]);
 
   return (
     <Provider store={store}>
       <ToastContainer />
       <RouterProvider router={router} />
-      
     </Provider>
   );
 }
