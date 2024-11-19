@@ -42,11 +42,14 @@ function DataPelamar() {
 
   const fetchPesertaData = async (token) => {
     try {
-      const response = await fetch("https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users2", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        "https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users2",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -163,7 +166,7 @@ function DataPelamar() {
   const currentData = sortedData().slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  // console.log("first", currentData);
+  console.log("first", currentData);
 
   const formatDate = (dateString) => {
     const options = { day: "2-digit", month: "2-digit", year: "numeric" };
@@ -172,58 +175,109 @@ function DataPelamar() {
       : "Kosong";
   };
 
-  const sendWhatsAppMessage = (phoneNumber, status) => {
-    if (!phoneNumber) {
-      // console.error("Nomor telepon tidak ditemukan.");
-      return;
-    }
+  // const sendWhatsAppMessage = (phoneNumber, status) => {
+  //   console.log("Nomor telepon ", phoneNumber);
+  //   if (!phoneNumber) {
+  //     console.error("Nomor telepon tidak ditemukan.", phoneNumber);
+  //     return;
+  //   }
 
-    let message = "";
-    if (status === "Accepted") {
-      message = `Selamat, lamaran magang Anda telah diterima. Terima kasih telah mendaftar!`;
-    } else if (status === "Rejected") {
-      message = `Maaf, lamaran magang Anda tidak dapat kami terima. Terima kasih telah mendaftar dan tetap semangat!`;
-    }
+  //   const formattedPhoneNumber = phoneNumber.startsWith("0")
+  //     ? `62${phoneNumber.slice(1)}`
+  //     : phoneNumber.startsWith("+62")
+  //     ? phoneNumber.slice(1)
+  //     : phoneNumber;
 
-    // Format nomor telepon dengan kode negara Indonesia
-    const formattedPhoneNumber = phoneNumber.startsWith("0")
-      ? `62${phoneNumber.slice(1)}`
-      : `62${phoneNumber}`;
+  //   if (!/^\d+$/.test(formattedPhoneNumber)) {
+  //     console.error("Nomor telepon tidak valid:", formattedPhoneNumber);
+  //     return;
+  //   }
 
-    // Buat URL WhatsApp API dengan pesan yang sudah di-encode
-    const whatsappURL = `https://wa.me/${formattedPhoneNumber}?text=${encodeURIComponent(
-      message
-    )}`;
+  //   // Pilih pesan sesuai status
+  //   let message = "";
+  //   if (status === "Accepted") {
+  //     message = `Selamat, lamaran magang Anda telah diterima. Terima kasih telah mendaftar!`;
+  //   } else if (status === "Rejected") {
+  //     message = `Maaf, lamaran magang Anda tidak dapat kami terima. Terima kasih telah mendaftar dan tetap semangat!`;
+  //   }
 
-    // Buka URL di tab baru
-    window.open(whatsappURL, "_blank");
-  };
+  //   // Buat URL WhatsApp dengan nomor dan pesan
+  //   const whatsappURL = `https://api.whatsapp.com/send/?phone=${formattedPhoneNumber}&text=${encodeURIComponent(
+  //     message
+  //   )}&type=phone_number&app_absent=0`;
 
-  const handleUpdateStatus = async (id, status, index) => {
+  //   console.log("Sending WhatsApp message to:", whatsappURL); // Debugging
+  //   window.open(whatsappURL, "_blank");
+  // };
+
+  const handleUpdateStatus = async (id, status, notelp) => {
     const token = localStorage.getItem("token");
     let data = { userId: id, status: status };
-    // console.log("DATA PPENGGUNA", data);
+
     if (!token) {
       window.location.href = "/loginadmin";
       return;
     }
 
     try {
-      await axios.put("https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users/status2", data, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.put(
+        "https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users/status2",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      // Fetch updated data
-      fetchPesertaData(token);
+      fetchData(token);
     } catch (error) {
-      // console.error("Error updating status:", error);
+      console.error("Error updating status:", error);
     }
-    // console.log(pesertaData); // Cek struktur data
-    const notelp = pesertaData[index]?.Profile?.telp_user; // Cek apakah 'notelp' valid
-    sendWhatsAppMessage(notelp, status);
+
+    // Format phone number to international format
+    const formattedPhoneNumber = formatPhoneNumber(notelp);
+
+    if (!formattedPhoneNumber) {
+      console.error("Invalid phone number format");
+      return;
+    }
+
+    //Pilih pesan sesuai status
+    let message = "";
+    if (status === "Accepted") {
+      message = `Selamat, lamaran magang Anda telah diterima. Terima kasih telah mendaftar!`;
+    } else if (status === "Rejected") {
+      message = `Maaf, lamaran magang Anda tidak dapat kami terima. Terima kasih telah mendaftar dan tetap semangat!`;
+    }
+    // Buat URL WhatsApp API dengan pesan yang sudah di-encode
+    const whatsappURL = `https://wa.me/${formattedPhoneNumber}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    // Membuka URL WhatsApp di tab baru
+    window.open(whatsappURL, "_blank");
+  };
+
+  // Function to format phone number to international format
+  const formatPhoneNumber = (phoneNumber) => {
+    if (!phoneNumber) return null;
+
+    // Remove any non-digit characters and leading zero
+    const cleaned = phoneNumber.replace(/\D/g, "");
+
+    // Check if it starts with a 0 (local format) and replace it with country code '62' for Indonesia
+    if (cleaned.startsWith("0")) {
+      return `+62${cleaned.slice(1)}`;
+    }
+
+    // If it already starts with the country code, return as is
+    if (cleaned.startsWith("62")) {
+      return `+${cleaned}`;
+    }
+
+    return null; // Return null if the phone number format is invalid
   };
 
   return (
@@ -384,7 +438,8 @@ function DataPelamar() {
                       {peserta.Regist.cv ? (
                         <a
                           href={
-                            "https://backend-prajagamer-920196572245.asia-southeast2.run.app/uploads/" + peserta.Regist.cv
+                            "https://backend-prajagamer-920196572245.asia-southeast2.run.app/uploads/" +
+                            peserta.Regist.cv
                           }
                           target="_blank"
                           rel="noopener noreferrer"
@@ -438,13 +493,25 @@ function DataPelamar() {
                       </span>
                     </td>
                     <td className="py-2 px-4 border-b">
-                    <div className="flex items-center justify-center space-x-2">
+                      <div className="flex items-center justify-center space-x-2">
                         {/* Tampilkan tombol "Terima" hanya jika statusnya bukan "Accepted" */}
                         {peserta.status !== "Rejected" && (
                           <button
-                            onClick={() =>
-                              handleUpdateStatus(peserta.id, "Accepted", index)
-                            }
+                            onClick={() => {
+                              const telpUser = peserta?.Profile?.telp_user; // Menggunakan optional chaining untuk menghindari error
+                              if (telpUser) {
+                                handleUpdateStatus(
+                                  peserta.id,
+                                  "Accepted",
+                                  telpUser
+                                );
+                              } else {
+                                console.error(
+                                  "Nomor telepon tidak ditemukan untuk peserta ID:",
+                                  peserta.id
+                                );
+                              }
+                            }}
                             className={`px-3 py-1 text-white rounded ${
                               peserta.status === "Accepted"
                                 ? "bg-gray-400 cursor-not-allowed" // Jika status Accepted, tombol Terima disabled
@@ -459,13 +526,21 @@ function DataPelamar() {
                         {/* Tampilkan tombol "Tolak" hanya jika statusnya bukan "Accepted" */}
                         {peserta.status !== "Accepted" && (
                           <button
-                            onClick={() =>
-                              handleUpdateStatus(
-                                peserta.id,
-                                "Rejected",
-                                index
-                              )
-                            }
+                            onClick={() => {
+                              const telpUser = peserta?.Profile?.telp_user; // Menggunakan optional chaining untuk menghindari error
+                              if (telpUser) {
+                                handleUpdateStatus(
+                                  peserta.id,
+                                  "Rejected",
+                                  telpUser
+                                );
+                              } else {
+                                console.error(
+                                  "Nomor telepon tidak ditemukan untuk peserta ID:",
+                                  peserta.id
+                                );
+                              }
+                            }}
                             className={`px-3 py-1 text-white rounded ${
                               peserta.status === "Rejected"
                                 ? "bg-gray-400 cursor-not-allowed" // Jika status Rejected, tombol Tolak disabled

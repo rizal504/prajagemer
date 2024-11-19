@@ -135,7 +135,7 @@ function ModalTambahAdmin({ isOpen, onClose, onAddAdmin }) {
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
-          pauseOnHover: true,
+          ApauseOnHover: true,
           draggable: true,
           progress: undefined,
           theme: "colored",

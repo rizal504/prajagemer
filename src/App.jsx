@@ -48,7 +48,6 @@ export default function App() {
     { path: "datapengguna", element: <DataPengguna /> },
     { path: "editprofiladmin", element: <EditProfilAdmin /> },
     { path: "syaratdanketentuan", element: <SyaratKetentuan /> },
-    // Tambahkan route 404 di sini (opsional)
     { path: "*", element: <NotFound /> }, // Pastikan NotFound sudah diimpor jika ingin menggunakan ini
   ]);
 

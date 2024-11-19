@@ -42,11 +42,14 @@ const DataPengguna = () => {
 
   const fetchData = async (token) => {
     try {
-      const response = await axios.get("https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        "https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setPesertaData(response.data);
     } catch (error) {
@@ -154,9 +157,67 @@ const DataPengguna = () => {
       : "Kosong";
   };
 
-  const sendWhatsAppMessage = (phoneNumber, status) => {
-    if (!phoneNumber) {
-      // console.error("Nomor telepon tidak ditemukan.");
+  // const sendWhatsAppMessage = (phoneNumber, status) => {
+  //   // Menampilkan nomor telepon di konsol
+  //   console.log("Nomor telepon yang diterima:", phoneNumber);
+
+  //   if (!phoneNumber) {
+  //     // console.error("Nomor telepon tidak ditemukan.");
+  //     return;
+  //   }
+
+  //   let message = "";
+  //   if (status === "Verifying") {
+  //     message = `Selamat, akun Anda telah diterima!`;
+  //   } else if (status === "NotVerifying") {
+  //     message = `Maaf, akun Anda tidak dapat kami terima.`;
+  //   }
+
+  //   const formattedPhoneNumber = phoneNumber;
+
+  //   // Menampilkan nomor telepon yang sudah diformat
+  //   console.log("Nomor telepon yang diformat:", formattedPhoneNumber);
+
+  //   // Buat URL WhatsApp API dengan pesan yang sudah di-encode
+  //   const whatsappURL = `https://wa.me/${formattedPhoneNumber}?text=${encodeURIComponent(
+  //     message
+  //   )}`;
+
+  //   // Membuka URL WhatsApp
+  //   window.open(whatsappURL, "_blank");
+  // };
+
+  const handleUpdateStatus = async (id, status, notelp) => {
+    const token = localStorage.getItem("token");
+    let data = { userId: id, status: status };
+
+    if (!token) {
+      window.location.href = "/loginadmin";
+      return;
+    }
+
+    try {
+      await axios.put(
+        "https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users/status",
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      fetchData(token);
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+
+    // Format phone number to international format
+    const formattedPhoneNumber = formatPhoneNumber(notelp);
+
+    if (!formattedPhoneNumber) {
+      console.error("Invalid phone number format");
       return;
     }
 
@@ -167,44 +228,33 @@ const DataPengguna = () => {
       message = `Maaf, akun Anda tidak dapat kami terima.`;
     }
 
-    const formattedPhoneNumber = phoneNumber.startsWith("0")
-      ? `62${phoneNumber.slice(1)}`
-      : `62${phoneNumber}`;
-
     // Buat URL WhatsApp API dengan pesan yang sudah di-encode
     const whatsappURL = `https://wa.me/${formattedPhoneNumber}?text=${encodeURIComponent(
       message
     )}`;
 
-    // Membuka URL WhatsApp
+    // Membuka URL WhatsApp di tab baru
     window.open(whatsappURL, "_blank");
   };
 
-  const handleUpdateStatus = async (id, status, index) => {
-    const token = localStorage.getItem("token");
-    let data = { userId: id, status: status };
-    // console.log("DATA PPENGGUNA", data);
-    if (!token) {
-      window.location.href = "/loginadmin";
-      return;
+  // Function to format phone number to international format
+  const formatPhoneNumber = (phoneNumber) => {
+    if (!phoneNumber) return null;
+
+    // Remove any non-digit characters and leading zero
+    const cleaned = phoneNumber.replace(/\D/g, "");
+
+    // Check if it starts with a 0 (local format) and replace it with country code '62' for Indonesia
+    if (cleaned.startsWith("0")) {
+      return `+62${cleaned.slice(1)}`;
     }
 
-    try {
-      await axios.put("https://backend-prajagamer-920196572245.asia-southeast2.run.app/api/users/status", data, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      // Fetch updated data
-      fetchData(token);
-    } catch (error) {
-      // console.error("Error updating status:", error);
+    // If it already starts with the country code, return as is
+    if (cleaned.startsWith("62")) {
+      return `+${cleaned}`;
     }
-    // console.log(pesertaData); // Cek struktur data
-    const notelp = pesertaData[index]?.Profile?.telp_user; // Cek apakah 'notelp' valid
-    sendWhatsAppMessage(notelp, status);
+
+    return null; // Return null if the phone number format is invalid
   };
 
   return (
@@ -413,9 +463,21 @@ const DataPengguna = () => {
                         {/* Tampilkan tombol "Terima" hanya jika statusnya bukan "NotVerifying" */}
                         {peserta.status !== "NotVerifying" && (
                           <button
-                            onClick={() =>
-                              handleUpdateStatus(peserta.id, "Verifying", index)
-                            }
+                            onClick={() => {
+                              const telpUser = peserta?.Profile?.telp_user; // Menggunakan optional chaining untuk menghindari error
+                              if (telpUser) {
+                                handleUpdateStatus(
+                                  peserta.id,
+                                  "Verifying",
+                                  telpUser
+                                );
+                              } else {
+                                console.error(
+                                  "Nomor telepon tidak ditemukan untuk peserta ID:",
+                                  peserta.id
+                                );
+                              }
+                            }}
                             className={`px-3 py-1 text-white rounded ${
                               peserta.status === "Verifying"
                                 ? "bg-gray-400 cursor-not-allowed" // Jika status Verifying, tombol Terima disabled
@@ -430,13 +492,21 @@ const DataPengguna = () => {
                         {/* Tampilkan tombol "Tolak" hanya jika statusnya bukan "Verifying" */}
                         {peserta.status !== "Verifying" && (
                           <button
-                            onClick={() =>
-                              handleUpdateStatus(
-                                peserta.id,
-                                "NotVerifying",
-                                index
-                              )
-                            }
+                            onClick={() => {
+                              const telpUser = peserta?.Profile?.telp_user; // Menggunakan optional chaining untuk menghindari error
+                              if (telpUser) {
+                                handleUpdateStatus(
+                                  peserta.id,
+                                  "NotVerifying",
+                                  telpUser
+                                );
+                              } else {
+                                console.error(
+                                  "Nomor telepon tidak ditemukan untuk peserta ID:",
+                                  peserta.id
+                                );
+                              }
+                            }}
                             className={`px-3 py-1 text-white rounded ${
                               peserta.status === "NotVerifying"
                                 ? "bg-gray-400 cursor-not-allowed" // Jika status NotVerifying, tombol Tolak disabled

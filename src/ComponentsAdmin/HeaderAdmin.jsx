@@ -26,7 +26,7 @@ const HeaderAdmin = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("adminName");
-    window.location.href = "/loginadmin"; // Redirect to login page
+    window.location.href = "/"; // Redirect to login page
   };
 
   return (
